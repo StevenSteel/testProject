@@ -11,12 +11,15 @@ class ArticleController extends Controller
     /**
      * Display a listing of the articles.
      *
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
+        $showPublished = (!Auth::check() || $request->get('publish', 1));
+
         $data = Article::join('users', 'users.id', '=', 'articles.user_id')
-                    ->where('articles.publish', true)
+                    ->where('articles.publish', $showPublished)
                     ->select(['articles.id', 'articles.title', 'articles.updated_at', 'articles.created_at', 'users.name as user'])
                     ->get();
 
@@ -29,7 +32,7 @@ class ArticleController extends Controller
     /**
      * Store a newly created article in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)

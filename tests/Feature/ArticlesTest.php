@@ -79,4 +79,39 @@ class ArticlesTest extends TestCase
                 ->assertJsonFragment(['id' => $article->id])
                 ->assertJsonMissing(['id' => $hiddenArticle->id]);
     }
+
+    /**
+     * @test
+     */
+    public function unauthenticated_user_cannot_view_unpublished_articles_overview()
+    {
+        $article = factory(Article::class)->create();
+        $hiddenArticle = factory(Article::class)->create(['publish' => false]);
+
+        $this->json('GET', route('articles.index', ['publish' => 0]))
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => [['id', 'title', 'updated_at', 'created_at', 'user']], 'total'])
+            ->assertJsonFragment(['total' => 1])
+            ->assertJsonFragment(['id' => $article->id])
+            ->assertJsonMissing(['id' => $hiddenArticle->id]);
+    }
+
+    /**
+     * @test
+     */
+    public function authenticated_user_can_view_unpublished_articles_overview()
+    {
+        $user = factory(User::class)->create();
+        $this->actingAs($user);
+
+        $article = factory(Article::class)->create();
+        $hiddenArticle = factory(Article::class)->create(['publish' => false]);
+
+        $this->json('GET', route('articles.index', ['publish' => 0]))
+            ->assertStatus(200)
+            ->assertJsonStructure(['data' => [['id', 'title', 'updated_at', 'created_at', 'user']], 'total'])
+            ->assertJsonFragment(['total' => 1])
+            ->assertJsonFragment(['id' => $hiddenArticle->id])
+            ->assertJsonMissing(['id' => $article->id]);
+    }
 }

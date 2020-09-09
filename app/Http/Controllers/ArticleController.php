@@ -11,26 +11,26 @@ class ArticleController extends Controller
     /**
      * Display a listing of the articles.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index()
     {
-        $data = Article::with('user')
-                    ->where('publish', true)
-                    ->select(['articles.id', 'articles.title', 'articles.updated_at', 'articles.created_at', 'user.name'])
+        $data = Article::join('users', 'users.id', '=', 'articles.user_id')
+                    ->where('articles.publish', true)
+                    ->select(['articles.id', 'articles.title', 'articles.updated_at', 'articles.created_at', 'users.name'])
                     ->get();
 
-        return [
+        return response()->json([
             'data' => $data,
             'total' => $data->count(),
-        ];
+        ]);
     }
 
     /**
      * Store a newly created article in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -48,8 +48,8 @@ class ArticleController extends Controller
         $article->user_id = Auth::id();
         $article->save();
 
-        return [
+        return response()->json([
             'status' => 'success'
-        ];
+        ]);
     }
 }

@@ -17,7 +17,7 @@ class ArticleController extends Controller
     {
         $data = Article::join('users', 'users.id', '=', 'articles.user_id')
                     ->where('articles.publish', true)
-                    ->select(['articles.id', 'articles.title', 'articles.updated_at', 'articles.created_at', 'users.name'])
+                    ->select(['articles.id', 'articles.title', 'articles.updated_at', 'articles.created_at', 'users.name as user'])
                     ->get();
 
         return response()->json([
